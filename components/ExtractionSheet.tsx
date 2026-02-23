@@ -6,9 +6,8 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Platform,
-  ScrollView,
 } from "react-native";
-import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
+import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS } from "../constants/mapStyles";
 import ProgressBar from "./ProgressBar";
@@ -70,11 +69,11 @@ export default function ExtractionSheet({
       backgroundStyle={styles.sheetBackground}
       handleIndicatorStyle={styles.handleIndicator}
     >
-      <BottomSheetView style={styles.content}>
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.scrollContent}
-        >
+      <BottomSheetScrollView
+        style={styles.content}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
           {/* Header */}
           <View style={styles.header}>
             <Text style={styles.title}>OSM Extractor</Text>
@@ -192,8 +191,7 @@ export default function ExtractionSheet({
               </TouchableOpacity>
             )}
           </View>
-        </ScrollView>
-      </BottomSheetView>
+      </BottomSheetScrollView>
     </BottomSheet>
   );
 }

@@ -57,8 +57,9 @@ export default function MainScreen() {
   }, [clearPolygon, resetExtraction]);
 
   const handleCloseSheet = useCallback(() => {
-    // Sheet closed — keep polygon visible but collapse sheet
-  }, []);
+    clearPolygon();
+    resetExtraction();
+  }, [clearPolygon, resetExtraction]);
 
   const flyToUser = useCallback(async () => {
     try {
@@ -96,6 +97,7 @@ export default function MainScreen() {
         isClosed={isClosed}
         isDrawing={isDrawing}
         onMapPress={handleMapPress}
+        cameraRef={cameraRef}
       />
 
       <DrawingToolbar
