@@ -1,9 +1,13 @@
 import { useState, useCallback, useRef } from "react";
-import * as FileSystem from "expo-file-system";
+import { File, Paths } from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import axios from "axios";
 import { API_BASE_URL } from "../constants/mapStyles";
-import type { ExtractionProgress, ExtractionStage, FeatureCollection } from "../types";
+import type {
+  ExtractionProgress,
+  ExtractionStage,
+  FeatureCollection,
+} from "../types";
 
 export function useExtraction() {
   const [extractionProgress, setExtractionProgress] =
@@ -18,74 +22,68 @@ export function useExtraction() {
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
   const wsRef = useRef<WebSocket | null>(null);
 
-  const previewRoads = useCallback(
-    async (polygonGeoJSON: object) => {
-      setIsLoadingPreview(true);
+  const previewRoads = useCallback(async (polygonGeoJSON: object) => {
+    setIsLoadingPreview(true);
+    try {
+      const response = await axios.post(`${API_BASE_URL}/preview`, {
+        polygon: polygonGeoJSON,
+      });
+      setRoadsGeoJSON(response.data as FeatureCollection);
+    } catch (error) {
+      console.error("Preview roads error:", error);
+      setRoadsGeoJSON(null);
+    } finally {
+      setIsLoadingPreview(false);
+    }
+  }, []);
+
+  const startExtraction = useCallback((polygonGeoJSON: object) => {
+    setExtractionProgress({ stage: "connecting", progress: 0 });
+    setDownloadUrl(null);
+
+    const wsUrl = API_BASE_URL.replace(/^http/, "ws");
+    const ws = new WebSocket(`${wsUrl}/ws/extract`);
+    wsRef.current = ws;
+
+    ws.onopen = () => {
+      ws.send(JSON.stringify({ polygon: polygonGeoJSON }));
+      setExtractionProgress({
+        stage: "downloading",
+        progress: 0,
+        message: "Downloading Overture data...",
+      });
+    };
+
+    ws.onmessage = (event: MessageEvent) => {
       try {
-        const response = await axios.post(`${API_BASE_URL}/preview`, {
-          polygon: polygonGeoJSON,
-        });
-        setRoadsGeoJSON(response.data as FeatureCollection);
-      } catch (error) {
-        console.error("Preview roads error:", error);
-        setRoadsGeoJSON(null);
-      } finally {
-        setIsLoadingPreview(false);
-      }
-    },
-    []
-  );
+        const data = JSON.parse(event.data as string);
+        const stage = data.stage as ExtractionStage;
+        const progress = (data.progress as number) || 0;
+        const message = data.message as string | undefined;
 
-  const startExtraction = useCallback(
-    (polygonGeoJSON: object) => {
-      setExtractionProgress({ stage: "connecting", progress: 0 });
-      setDownloadUrl(null);
+        setExtractionProgress({ stage, progress, message });
 
-      const wsUrl = API_BASE_URL.replace(/^http/, "ws");
-      const ws = new WebSocket(`${wsUrl}/ws/extract`);
-      wsRef.current = ws;
-
-      ws.onopen = () => {
-        ws.send(JSON.stringify({ polygon: polygonGeoJSON }));
-        setExtractionProgress({
-          stage: "downloading",
-          progress: 0,
-          message: "Downloading Overture data...",
-        });
-      };
-
-      ws.onmessage = (event: MessageEvent) => {
-        try {
-          const data = JSON.parse(event.data as string);
-          const stage = data.stage as ExtractionStage;
-          const progress = (data.progress as number) || 0;
-          const message = data.message as string | undefined;
-
-          setExtractionProgress({ stage, progress, message });
-
-          if (stage === "complete" && data.download_url) {
-            setDownloadUrl(data.download_url as string);
-            ws.close();
-          }
-        } catch (err) {
-          console.error("WS parse error:", err);
+        if (stage === "complete" && data.download_url) {
+          setDownloadUrl(data.download_url as string);
+          ws.close();
         }
-      };
+      } catch (err) {
+        console.error("WS parse error:", err);
+      }
+    };
 
-      ws.onerror = () => {
-        setExtractionProgress({
-          stage: "error",
-          progress: 0,
-          message: "Connection error",
-        });
-      };
+    ws.onerror = () => {
+      setExtractionProgress({
+        stage: "error",
+        progress: 0,
+        message: "Connection error",
+      });
+    };
 
-      ws.onclose = () => {
-        wsRef.current = null;
-      };
-    },
-    []
-  );
+    ws.onclose = () => {
+      wsRef.current = null;
+    };
+  }, []);
 
   const cancelExtraction = useCallback(() => {
     if (wsRef.current) {
@@ -99,17 +97,14 @@ export function useExtraction() {
     if (!downloadUrl) return;
 
     try {
-      const fileName = downloadUrl.split("/").pop() || "graph.bin";
-      const fileUri = `${FileSystem.documentDirectory}${fileName}`;
-
-      const downloadResult = await FileSystem.downloadAsync(
+      const downloadedFile = await File.downloadFileAsync(
         downloadUrl,
-        fileUri
+        Paths.cache
       );
 
       const isAvailable = await Sharing.isAvailableAsync();
       if (isAvailable) {
-        await Sharing.shareAsync(downloadResult.uri, {
+        await Sharing.shareAsync(downloadedFile.uri, {
           mimeType: "application/octet-stream",
           dialogTitle: "Save Graph File",
         });
