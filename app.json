@@ -35,10 +35,10 @@
       [
         "@rnmapbox/maps",
         {
-          "RNMapboxMapsImpl": "mapbox",
-          "RNMapboxMapsDownloadToken": "MAPBOX_DOWNLOAD_TOKEN"
+          "RNMapboxMapsImpl": "mapbox"
         }
-      ]
+      ],
+      "expo-font"
     ]
   }
 }
