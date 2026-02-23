@@ -1,7 +1,6 @@
 import React, { useRef, useCallback, useEffect } from "react";
 import { StyleSheet, View, Platform } from "react-native";
 import MapboxGL from "@rnmapbox/maps";
-import * as Location from "expo-location";
 import {
   MAP_STYLE_URL,
   MAPBOX_TOKEN,
@@ -24,6 +23,7 @@ interface MapViewProps {
   isClosed: boolean;
   isDrawing: boolean;
   onMapPress: (e: { geometry: { coordinates: number[] } }) => void;
+  cameraRef: React.RefObject<MapboxGL.Camera>;
 }
 
 export default function MapScreen({
@@ -34,40 +34,14 @@ export default function MapScreen({
   isClosed,
   isDrawing,
   onMapPress,
+  cameraRef,
 }: MapViewProps) {
   const mapRef = useRef<MapboxGL.MapView>(null);
-  const cameraRef = useRef<MapboxGL.Camera>(null);
 
   useEffect(() => {
     if (Platform.OS === "ios") {
       MapboxGL.setTelemetryEnabled(false);
     }
-  }, []);
-
-  const flyToUser = useCallback(async () => {
-    try {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") return;
-
-      const location = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Balanced,
-      });
-
-      cameraRef.current?.setCamera({
-        centerCoordinate: [location.coords.longitude, location.coords.latitude],
-        zoomLevel: 14,
-        animationDuration: 1000,
-      });
-    } catch (err) {
-      console.error("Location error:", err);
-    }
-  }, []);
-
-  const resetBearing = useCallback(() => {
-    cameraRef.current?.setCamera({
-      heading: 0,
-      animationDuration: 500,
-    });
   }, []);
 
   const handlePress = useCallback(
