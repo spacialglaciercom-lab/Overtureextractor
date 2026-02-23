@@ -46,11 +46,19 @@ EXPO_PUBLIC_API_BASE_URL=https://your-railway-backend.up.railway.app
 EXPO_PUBLIC_MAP_STYLE=https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json
 ```
 
-### 3. Mapbox token
+### 3. Mapbox tokens
 
-You need a Mapbox access token. Sign up at [mapbox.com](https://www.mapbox.com/) and create a token with `Downloads:Read` scope for native SDK access.
+You need **two** Mapbox tokens. Sign up at [mapbox.com](https://www.mapbox.com/) and create them from your [account tokens page](https://account.mapbox.com/access-tokens/).
 
-For iOS native builds, you also need to configure the Mapbox download token in `app.json` under the `@rnmapbox/maps` plugin config:
+#### Public token (`pk.*`) — runtime
+
+Set as `EXPO_PUBLIC_MAPBOX_TOKEN` in `.env`. Keep the default public scopes enabled:
+
+- `STYLES:TILES`, `STYLES:READ`, `FONTS:READ`, `DATASETS:READ`, `VISION:READ`
+
+#### Secret token (`sk.*`) — build-time SDK download
+
+Configure in `app.json` under the `@rnmapbox/maps` plugin. This token only needs the **`DOWNLOADS:READ`** secret scope — no other secret scopes are required.
 
 ```json
 ["@rnmapbox/maps", {
