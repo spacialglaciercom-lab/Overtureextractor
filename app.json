@@ -38,9 +38,6 @@
           "RNMapboxMapsImpl": "mapbox",
           "RNMapboxMapsDownloadToken": "MAPBOX_DOWNLOAD_TOKEN"
         }
-      ],
-      [
-        "react-native-reanimated/plugin"
       ]
     ]
   }
