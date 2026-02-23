@@ -3,7 +3,7 @@ export const MAP_STYLE_URL =
   "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json";
 
 export const API_BASE_URL =
-  process.env.EXPO_PUBLIC_API_BASE_URL || "https://your-app.up.railway.app";
+  process.env.EXPO_PUBLIC_API_BASE_URL || "https://elegant-reverence-backend.up.railway.app";
 
 export const MAPBOX_TOKEN = process.env.EXPO_PUBLIC_MAPBOX_TOKEN || "";
 

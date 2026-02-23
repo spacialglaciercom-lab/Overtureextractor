@@ -23,6 +23,7 @@
     "expo-router": "~6.0.23",
     "expo-sharing": "^14.0.8",
     "expo-status-bar": "~3.0.9",
+    "geojson": "^0.5.0",
     "react": "19.1.0",
     "react-native": "0.81.5",
     "react-native-gesture-handler": "^2.30.0",
@@ -31,6 +32,7 @@
     "react-native-screens": "~4.16.0"
   },
   "devDependencies": {
+    "@types/geojson": "^7946.0.16",
     "@types/react": "~19.1.0",
     "typescript": "~5.9.2"
   },

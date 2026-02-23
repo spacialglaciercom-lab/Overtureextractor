@@ -1,4 +1,11 @@
-import type { Position, Feature, FeatureCollection, Polygon, LineString, Point } from "@turf/turf";
+import type {
+  Position,
+  Feature,
+  FeatureCollection,
+  Polygon,
+  LineString,
+  Point,
+} from "geojson";
 
 export type { Position, Feature, FeatureCollection, Polygon, LineString, Point };
 
